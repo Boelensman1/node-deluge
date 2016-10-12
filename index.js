@@ -45,6 +45,7 @@ module.exports = function deluge(hostname, password, port) {
   function listTorrents(torrentHashes) {
     const toR = Q.defer();
     const params = [torrentHashes, [
+      'hash',
       'queue',
       'name',
       'total_size',
@@ -73,6 +74,11 @@ module.exports = function deluge(hostname, password, port) {
 
     sendRequest('webapi.get_torrents', params, function(data) {
       if (data) {
+        data.result.torrents = data.result.torrents.map(function(torrent) {
+          const torrentFormatted = {};
+          torrentFormatted[torrent.hash] = torrent;
+          return torrentFormatted;
+        });
         toR.resolve(data);
       } else {
         toR.reject(data);
