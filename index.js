@@ -73,7 +73,7 @@ module.exports = function deluge(hostname, password, port) {
     ];
 
     sendRequest('webapi.get_torrents', params, function(data) {
-      if (data) {
+      if (data && data.result && data.result.torrents) {
         data.result.torrents = data.result.torrents.map(function(torrent) {
           const torrentFormatted = {};
           torrentFormatted[torrent.hash] = torrent;
@@ -189,12 +189,11 @@ module.exports = function deluge(hostname, password, port) {
     //make payload a string for http request
     payload = JSON.stringify(payload);
 
+    const head = {'Content-Type': 'application/json'};
+
     //set auth cookie if already authenticated
-    let head;
     if(authCookie != '') {
-      head = {
-        'Cookie': authCookie,
-      };
+      head.Cookie = authCookie;
     }
 
     //setup our http request parameters
@@ -207,7 +206,6 @@ module.exports = function deluge(hostname, password, port) {
     };
 
     const req = http.request(options, function(res) {
-
       const gunzip = zlib.createGunzip();
       res.pipe(gunzip);
 
